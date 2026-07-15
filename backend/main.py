@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 from pathlib import Path
 

@@ -2,7 +2,7 @@ import requests
 import json
 import sys
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8001"
 
 def test_endpoint(name, method, path, json_data=None, files=None):
     url = f"{BASE_URL}{path}"
