@@ -7,6 +7,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
+from sklearn.naive_bayes import MultinomialNB
+
 # 1. Define folder outputs
 WEIGHTS_DIR = "../models_weights"
 os.makedirs(WEIGHTS_DIR, exist_ok=True)
@@ -19,22 +21,40 @@ data = {
         "sudden numbness in face and left side body, speech slurred",
         "severe headache and high fever with stiff neck",
         "coughing up blood, sharp pain when inhaling",
+        "crushing chest pain radiating to left shoulder and jaw",
+        "sudden weakness in arm and leg, difficulty speaking",
+        "severe breathing difficulty, gasping for air, blue lips",
+        "unconscious and unresponsive after falling from height",
+        "heavy bleeding from a deep neck wound, pulsing",
         
         "mild cough and runny nose, slight throat irritation",
         "scratched my elbow playing football, minor bleeding",
         "feeling tired and mild headache after long screen time",
         "stubbed my toe, slight swelling but can walk",
         "dry throat, sneezing, feel like a common cold",
+        "mild throat tickle, sneezing occasionally, no fever",
+        "dry skin on my fingers, slightly itchy",
+        "minor paper cut on index finger, not bleeding anymore",
+        "feeling a bit bloated after eating carbonated drinks",
+        "slightly sore muscles after a gym session yesterday",
         
         "stomach pain and vomiting after eating street food",
         "sprained my ankle, swollen and painful to press",
         "moderate fever 101F, body aches and chills",
         "persistent back pain for two weeks, dull ache",
-        "burn on hand from hot tea, minor blistering"
+        "burn on hand from hot tea, minor blistering",
+        "stomach cramps and watery diarrhea for the last 2 days",
+        "twisted my wrist while lifting weights, tender and swollen",
+        "persistent cough with yellow phlegm, mild wheezing",
+        "painful urination with a frequent urge, mild back ache",
+        "moderate burn on my arm from stove steam, red and painful"
     ],
     "severity": [
         "critical", "critical", "critical", "critical", "critical",
+        "critical", "critical", "critical", "critical", "critical",
         "low", "low", "low", "low", "low",
+        "low", "low", "low", "low", "low",
+        "moderate", "moderate", "moderate", "moderate", "moderate",
         "moderate", "moderate", "moderate", "moderate", "moderate"
     ]
 }
@@ -56,8 +76,8 @@ def train_triage_model():
     # Define vectorizer + classifier pipeline
     print("Building TF-IDF + Logistic Regression pipeline...")
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(ngram_range=(1, 2), stop_words='english')),
-        ('clf', LogisticRegression(C=1.0, random_state=42))
+        ('tfidf', TfidfVectorizer(ngram_range=(1, 1), stop_words='english')),
+        ('clf', MultinomialNB(alpha=0.1))
     ])
     
     # Train the model

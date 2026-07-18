@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 import librosa
-import soundfile as sf
+from scipy.io.wavfile import write as wav_write
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -30,7 +30,9 @@ def generate_mock_audio():
         freq = 120 + np.random.uniform(-5, 5)
         wave = np.sin(2 * np.pi * freq * t) + np.random.normal(0, 0.05, len(t))
         wave = wave / np.max(np.abs(wave))  # normalize
-        sf.write(os.path.join(DATASETS_DIR, f"calm_{i}.wav"), wave, sr)
+        # Convert to 16-bit PCM for wav_write
+        wave_int16 = (wave * 32767).astype(np.int16)
+        wav_write(os.path.join(DATASETS_DIR, f"calm_{i}.wav"), sr, wave_int16)
 
     # Generate 10 Stressed samples
     for i in range(10):
@@ -39,7 +41,9 @@ def generate_mock_audio():
         freq = 250 + modulator + np.random.uniform(-10, 10)
         wave = np.sin(2 * np.pi * freq * t) + np.random.normal(0, 0.15, len(t))
         wave = wave / np.max(np.abs(wave))  # normalize
-        sf.write(os.path.join(DATASETS_DIR, f"stressed_{i}.wav"), wave, sr)
+        # Convert to 16-bit PCM for wav_write
+        wave_int16 = (wave * 32767).astype(np.int16)
+        wav_write(os.path.join(DATASETS_DIR, f"stressed_{i}.wav"), sr, wave_int16)
         
     print(f"Mock audio generated in: {DATASETS_DIR}")
 

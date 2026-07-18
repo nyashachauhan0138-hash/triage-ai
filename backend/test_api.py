@@ -45,6 +45,8 @@ if __name__ == "__main__":
         "symptoms": "chest pain, shortness of breath",
         "severity_score": 6.5,
         "care_level": "URGENT",
+        "possible_diseases": ["Angina", "Myocardial Infarction", "Pneumonia"],
+        "recommended_tests": ["Electrocardiogram (ECG)", "Chest X-Ray", "Cardiac Troponin Test"],
         "recommendation": "Rest and monitor condition."
     }
     test_endpoint("Report Generate", "POST", "/report/generate", json_data=report_payload)
@@ -69,5 +71,20 @@ if __name__ == "__main__":
     finally:
         if os.path.exists("mock_audio.wav"):
             os.remove("mock_audio.wav")
+
+    # 7. Report Analyze (PDF)
+    from reportlab.pdfgen import canvas
+    try:
+        c = canvas.Canvas("mock_report.pdf")
+        c.drawString(100, 750, "Patient medical findings:")
+        c.drawString(100, 730, "Symptoms: high fever, body aches, severe joint pain, rash.")
+        c.drawString(100, 710, "Doctor assessment suggests dengue fever or viral infection.")
+        c.save()
+        
+        with open("mock_report.pdf", "rb") as f:
+            test_endpoint("Report Analyze (PDF)", "POST", "/report/analyze", files={"file": f})
+    finally:
+        if os.path.exists("mock_report.pdf"):
+            os.remove("mock_report.pdf")
 
     print("=== TESTS COMPLETE ===")

@@ -13,6 +13,8 @@ Return ONLY valid JSON.
   "severity_score": 0,
   "care_level": "",
   "emergency_flag": false,
+  "possible_diseases": [],
+  "recommended_tests": [],
   "next_question": "",
   "triage_complete": false,
   "summary": ""
