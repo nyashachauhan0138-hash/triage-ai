@@ -106,26 +106,13 @@ class ReportAnalysisService:
             Message(role="user", content=f"Here is a medical report/lab results summary: \n\n{extracted_text}\n\nPlease analyze my symptoms and triage my state.")
         ]
         
-        raw_response = GroqService.generate(dummy_messages)
-        triage_data = extract_json(raw_response)
+        from services.triage import TriageCoordinator
+        triage_data = TriageCoordinator.triage(dummy_messages)
 
         # Run local custom-trained classifier on the extracted text
         local_prediction = SymptomClassifierService.predict(extracted_text[:1000]) # Pass snippet
         triage_data["local_severity_prediction"] = local_prediction
-
-        # Determine emergency mode
-        severity_score = triage_data.get("severity_score", 0)
-        try:
-            severity_score = float(severity_score) if severity_score is not None else 0
-        except (ValueError, TypeError):
-            severity_score = 0
-
-        is_emergency = (
-            severity_score >= 8 or 
-            triage_data.get("emergency_flag") is True or 
-            str(triage_data.get("care_level")).upper() == "EMERGENCY"
-        )
-        triage_data["emergency_mode"] = is_emergency
+        triage_data["emergency_mode"] = triage_data["emergency_flag"]
         triage_data["extracted_report_text"] = extracted_text
 
         return triage_data
