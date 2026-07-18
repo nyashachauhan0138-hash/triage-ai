@@ -104,6 +104,54 @@ class DiseasePredictor:
                     "source": "llm_only"
                 }
 
+        # 3. Merge local custom-trained ML disease classifier predictions
+        try:
+            from services.disease_classifier_service import DiseaseClassifierService
+            symptoms_str = " ".join(symptoms)
+            local_ml_probs = DiseaseClassifierService.predict(symptoms_str)
+            
+            for name, prob in local_ml_probs.items():
+                name_lower = name.lower()
+                if prob < 0.05:
+                    continue
+                    
+                # Clean and normalize names
+                matched_kb_name = None
+                for kb_name in MedicalKnowledgeBase.CONDITIONS.keys():
+                    if kb_name.lower() in name_lower or name_lower in kb_name.lower():
+                        matched_kb_name = kb_name
+                        break
+                        
+                if matched_kb_name:
+                    kb_key = matched_kb_name.lower()
+                    if kb_key in merged_predictions:
+                        existing = merged_predictions[kb_key]
+                        # Blend the probabilities: 70% existing source (LLM/KB), 30% local ML model
+                        avg_conf = (existing["confidence"] * 0.7) + (prob * 0.3)
+                        existing["confidence"] = round(avg_conf, 2)
+                    else:
+                        kb_details = MedicalKnowledgeBase.CONDITIONS[matched_kb_name]
+                        merged_predictions[kb_key] = {
+                            "name": matched_kb_name,
+                            "confidence": round(prob, 2),
+                            "reason": kb_details["explanation"],
+                            "source": "local_ml"
+                        }
+                else:
+                    if name_lower in merged_predictions:
+                        existing = merged_predictions[name_lower]
+                        avg_conf = (existing["confidence"] * 0.7) + (prob * 0.3)
+                        existing["confidence"] = round(avg_conf, 2)
+                    else:
+                        merged_predictions[name_lower] = {
+                            "name": name,
+                            "confidence": round(prob, 2),
+                            "reason": f"Symptom descriptions suggest a possible case of {name} based on custom ML models.",
+                            "source": "local_ml"
+                        }
+        except Exception as e:
+            print(f"Failed to integrate local disease classification: {e}")
+
         # Convert to list and sort by confidence descending
         final_list = list(merged_predictions.values())
         final_list.sort(key=lambda x: x["confidence"], reverse=True)
