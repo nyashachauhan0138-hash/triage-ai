@@ -1,7 +1,23 @@
-# pyrefly: ignore [missing-import]
-import uvicorn
-import socket
 import sys
+import os
+from pathlib import Path
+
+# Automatically re-execute using the project's virtual environment if run with system python
+try:
+    import uvicorn
+    import fastapi
+except ImportError:
+    script_dir = Path(__file__).resolve().parent
+    venv_python = (script_dir.parent.parent / ".venv" / "bin" / "python").absolute()
+    if venv_python.exists() and Path(sys.executable).absolute() != venv_python:
+        print(f"Required libraries not found in current environment. Re-running server using virtualenv python: {venv_python}")
+        os.execv(str(venv_python), [str(venv_python)] + sys.argv)
+    else:
+        print("Error: Missing required server libraries (uvicorn, fastapi).")
+        sys.exit(1)
+
+# pyrefly: ignore [missing-import]
+import socket
 
 if __name__ == "__main__":
     import os

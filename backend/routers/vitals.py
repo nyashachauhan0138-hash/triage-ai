@@ -24,8 +24,10 @@ async def analyze_vitals(
     with open(temp_path, "wb") as f:
         f.write(await file.read())
 
-    result = RPPGService.analyze(temp_path)
-
-    os.remove(temp_path)
+    try:
+        result = RPPGService.analyze(temp_path)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
     return result

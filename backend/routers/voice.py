@@ -24,9 +24,11 @@ async def analyze_voice(
     with open(temp_path, "wb") as f:
         f.write(await file.read())
 
-    result = VoiceService.analyze(temp_path)
-
-    os.remove(temp_path)
+    try:
+        result = VoiceService.analyze(temp_path)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
     return result
 
@@ -46,8 +48,10 @@ async def transcribe_voice(
     with open(temp_path, "wb") as f:
         f.write(await file.read())
 
-    transcript = GroqService.transcribe(temp_path)
-
-    os.remove(temp_path)
+    try:
+        transcript = GroqService.transcribe(temp_path)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
     return {"transcript": transcript}

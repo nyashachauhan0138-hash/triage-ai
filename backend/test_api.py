@@ -1,6 +1,22 @@
-import requests
-import json
 import sys
+import os
+from pathlib import Path
+
+# Automatically re-execute using the project's virtual environment if run with system python
+try:
+    import requests
+    import reportlab
+except ImportError:
+    script_dir = Path(__file__).resolve().parent
+    venv_python = (script_dir.parent.parent / ".venv" / "bin" / "python").absolute()
+    if venv_python.exists() and Path(sys.executable).absolute() != venv_python:
+        print(f"Required libraries not found in current environment. Re-running script using virtualenv python: {venv_python}")
+        os.execv(str(venv_python), [str(venv_python)] + sys.argv)
+    else:
+        print("Error: Missing required test libraries (requests, reportlab).")
+        sys.exit(1)
+
+import json
 
 BASE_URL = "http://127.0.0.1:8005"
 

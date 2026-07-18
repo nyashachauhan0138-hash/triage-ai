@@ -1,4 +1,21 @@
+import sys
 import os
+from pathlib import Path
+
+# Automatically re-execute using the project's virtual environment if run with system python
+try:
+    import pandas
+    import sklearn
+except ImportError:
+    script_dir = Path(__file__).resolve().parent
+    venv_python = (script_dir.parent.parent / ".venv" / "bin" / "python").absolute()
+    if venv_python.exists() and Path(sys.executable).absolute() != venv_python:
+        print(f"Required libraries not found in current environment. Re-running script using virtualenv python: {venv_python}")
+        os.execv(str(venv_python), [str(venv_python)] + sys.argv)
+    else:
+        print("Error: Missing required machine learning libraries (pandas, scikit-learn).")
+        sys.exit(1)
+
 import pickle
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -6,11 +23,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
-
 from sklearn.naive_bayes import MultinomialNB
 
 # 1. Define folder outputs
-WEIGHTS_DIR = "../models_weights"
+SCRIPT_DIR = Path(__file__).resolve().parent
+WEIGHTS_DIR = SCRIPT_DIR.parent / "models_weights"
 os.makedirs(WEIGHTS_DIR, exist_ok=True)
 
 # 2. Mock dataset representing patient symptoms and triage severities
